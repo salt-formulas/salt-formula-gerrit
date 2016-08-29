@@ -10,5 +10,5 @@ parameters:
         address: 0.0.0.0
       mail:
         host: localhost
-        from: gerrit
+        from: gerrit@domain.com
         include_diff: true

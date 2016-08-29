@@ -17,9 +17,11 @@ gerrit_home:
     - {{ server.dir.home }}/.ssh
     - {{ server.dir.home }}/gerrit-wars
     - {{ server.dir.site }}/bin
+    - {{ server.dir.site }}/cache
     - {{ server.dir.site }}/etc/its
     - {{ server.dir.site }}/hooks
     - {{ server.dir.site }}/lib
+    - {{ server.dir.site }}/logs
     - {{ server.dir.site }}/static
     - /var/log/gerrit
   - makedirs: true
@@ -69,9 +71,45 @@ gerrit_home:
 
 {% endif %}
 
+{{ server.dir.site }}/etc/ssh_project_rsa_key:
+  file.managed:
+  - contents_pillar: gerrit:server:ssh_rsa_key
+  - user: gerrit2
+  - group: gerrit2
+  - mode: 600
+  - require:
+    - file: gerrit_home
+
+{{ server.dir.site }}/etc/ssh_project_rsa_key.pub:
+  file.managed:
+  - contents_pillar: gerrit:server:ssh_rsa_key_pub
+  - user: gerrit2
+  - group: gerrit2
+  - mode: 644
+  - require:
+    - file: gerrit_home
+
+{{ server.dir.site }}/etc/ssh_host_rsa_key:
+  file.managed:
+  - contents_pillar: gerrit:server:ssh_rsa_key
+  - user: gerrit2
+  - group: gerrit2
+  - mode: 600
+  - require:
+    - file: gerrit_home
+
+{{ server.dir.site }}/etc/ssh_host_rsa_key.pub:
+  file.managed:
+  - contents_pillar: gerrit:server:ssh_rsa_key_pub
+  - user: gerrit2
+  - group: gerrit2
+  - mode: 644
+  - require:
+    - file: gerrit_home
+
 {{ server.dir.site }}/etc/ssh_welcome_rsa_key:
   file.managed:
-  - contents_pillar: gerrit:server:ssh_welcome_rsa_key
+  - contents_pillar: gerrit:server:ssh_rsa_key
   - user: gerrit2
   - group: gerrit2
   - mode: 600
@@ -80,7 +118,25 @@ gerrit_home:
 
 {{ server.dir.site }}/etc/ssh_welcome_rsa_key.pub:
   file.managed:
-  - contents_pillar: gerrit:server:ssh_welcome_rsa_key_pub
+  - contents_pillar: gerrit:server:ssh_rsa_key_pub
+  - user: gerrit2
+  - group: gerrit2
+  - mode: 644
+  - require:
+    - file: gerrit_home
+
+{{ server.dir.home }}/.ssh/id_rsa:
+  file.managed:
+  - contents_pillar: gerrit:server:ssh_rsa_key
+  - user: gerrit2
+  - group: gerrit2
+  - mode: 600
+  - require:
+    - file: gerrit_home
+
+{{ server.dir.home }}/.ssh/id_rsa.pub:
+  file.managed:
+  - contents_pillar: gerrit:server:ssh_rsa_key_pub
   - user: gerrit2
   - group: gerrit2
   - mode: 644
@@ -146,5 +202,13 @@ gerrit_server_service:
   - require:
     - file: gerrit_server_service_symlink
     - cmd: gerrit_server_initial_index
+
+gerrit_server_known_host:
+  ssh_known_hosts.present:
+    - name: localhost
+    - port: 29418
+    - user: gerrit2
+    - require:
+      - file: gerrit_home
 
 {%- endif %}
