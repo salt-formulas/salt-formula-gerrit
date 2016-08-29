@@ -8,3 +8,7 @@ parameters:
       enabled: true
       bind:
         address: 0.0.0.0
+      mail:
+        host: localhost
+        from: gerrit
+        include_diff: true

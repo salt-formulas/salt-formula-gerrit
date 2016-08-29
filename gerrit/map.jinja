@@ -1,29 +1,14 @@
 
-{%- set source_engine = salt['pillar.get']('gerrit:server:source:engine') %}
-
 {%- load_yaml as base_defaults %}
-{%- if source_engine == 'git' %}
 Debian:
   pkgs:
-  - python-psycopg2
+  - unzip
+  - gitweb
   dir:
-    base: /srv/gerrit/venv
-    home: /var/lib/gerrit
-    workspace: /srv/gerrit/workspace
-RedHat:
-  pkgs:
-  - python-psycopg2
-  dir:
-    base: /srv/gerrit/venv
-    home: /var/lib/gerrit
-    workspace: /srv/gerrit/workspace
-{%- else %}
-Debian:
-  pkgs:
-  - gerrit
-  dir:
-    base: /usr/lib/gerrit
-{%- endif %}
+    home: "/srv/gerrit2"
+    site: "/srv/gerrit2/review_site"
+  service: gerrit
+  reindex_threads: 1
 {%- endload %}
 
 {%- set server = salt['grains.filter_by'](base_defaults, merge=salt['pillar.get']('gerrit:server')) %}

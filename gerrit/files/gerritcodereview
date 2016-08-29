@@ -1,0 +1,4 @@
+{%- from "gerrit/map.jinja" import server with context %}
+GERRIT_SITE={{ server.dir.site }}
+GERRIT_WAR={{ server.dir.site }}/bin/gerrit.war
+JAVA_OPTIONS=""
