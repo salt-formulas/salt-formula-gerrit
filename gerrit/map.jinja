@@ -1,5 +1,5 @@
 
-{%- load_yaml as base_defaults %}
+{%- load_yaml as server_defaults %}
 Debian:
   pkgs:
   - unzip
@@ -11,4 +11,12 @@ Debian:
   reindex_threads: 1
 {%- endload %}
 
-{%- set server = salt['grains.filter_by'](base_defaults, merge=salt['pillar.get']('gerrit:server')) %}
+{%- set server = salt['grains.filter_by'](server_defaults, merge=salt['pillar.get']('gerrit:server')) %}
+
+{%- load_yaml as client_defaults %}
+Debian:
+  pkgs:
+  - python-gerritlib
+{%- endload %}
+
+{%- set client = salt['grains.filter_by'](client_defaults, merge=salt['pillar.get']('gerrit:client')) %}
