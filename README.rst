@@ -95,5 +95,7 @@ Read more
 =========
 
 * https://www.gerritcodereview.com/
+* https://gerrit-review.googlesource.com/Documentation/
 * https://github.com/openstack-infra/puppet-gerrit/
 * https://gerrit-ci.gerritforge.com/
+* https://github.com/morucci/exzuul
