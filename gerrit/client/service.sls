@@ -5,21 +5,22 @@ gerrit_client_install:
   pkg.installed:
   - names: {{ client.pkgs }}
 
+gerrit_client_dirs:
+  file.directory:
+  - names: 
+    - {{ client.dir.acls }}
+    - {{ client.dir.cache }}
+    - {{ client.dir.git }}
+  - makedirs: true
+
 /etc/salt/minion.d/_gerrit.conf:
   file.managed:
   - source: salt://gerrit/files/_gerrit.conf
   - template: jinja
 
-/var/cache/salt/minion/gerrit_rsa:
+{{ client.config.key }}:
   file.managed:
+  - mode: 400
   - contents_pillar: gerrit:client:server:key
-
-{%- for project_name, project in client.project.iteritems() %}
-
-gerrit_client_project_{{ project_name }}:
-  gerrit.project_present:
-  - name: {{ project_name }}
-
-{%- endfor %}
 
 {%- endif %}

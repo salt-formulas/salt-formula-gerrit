@@ -87,9 +87,98 @@ Gerrit client enforcing projects
             jvMXms60iD/A5OpG33LWHNNzQBP486SxG75LB+Xs5sp5j2/b7VF5LJLhpGiJv9Mk
             ydbuy8iuuvali2uF133kAlLqnrWfVTYQQI1OfW5glOv1L6kv94dU
             -----END RSA PRIVATE KEY-----
+          email: "Project Creator <infra@lists.domain.com>"
         project:
           test_salt_project:
             enabled: true
+
+Gerrit client enforcing project, full project example
+
+.. code-block:: yaml
+
+    gerrit:
+      client:
+        enabled: True
+        project:
+          test_salt_project:
+            enabled: true
+            access:
+              "refs/heads/*":
+                actions:
+                - name: abandon
+                  group: openstack-salt-core
+                - name: create
+                  group: openstack-salt-release
+                labels:
+                - name: Code-Review
+                  group: openstack-salt-core
+                  score: -2..+2
+                - name: Workflow
+                  group: openstack-salt-core
+                  score: -1..+1
+              "refs/tags/*":
+                actions:
+                - name: pushSignedTag
+                  group: openstack-salt-release
+            require_change_id: true
+            require_agreement: true
+            merge_content: true
+
+Sample project access
+
+.. code-block:: yaml
+
+    [access "refs/*"]
+      read = group Administrators
+      read = group Anonymous Users
+    [access "refs/for/refs/*"]
+      push = group Registered Users
+      pushMerge = group Registered Users
+    [access "refs/heads/*"]
+      create = group Administrators
+      create = group Project Owners
+      forgeAuthor = group Registered Users
+      forgeCommitter = group Administrators
+      forgeCommitter = group Project Owners
+      push = group Administrators
+      push = group Project Owners
+      label-Code-Review = -2..+2 group Administrators
+      label-Code-Review = -2..+2 group Project Owners
+      label-Code-Review = -1..+1 group Registered Users
+      label-Verified = -1..+1 group Non-Interactive Users
+      submit = group Administrators
+      submit = group Project Owners
+      editTopicName = +force group Administrators
+      editTopicName = +force group Project Owners
+    [access "refs/meta/config"]
+      exclusiveGroupPermissions = read
+      read = group Administrators
+      read = group Project Owners
+      push = group Administrators
+      push = group Project Owners
+      label-Code-Review = -2..+2 group Administrators
+      label-Code-Review = -2..+2 group Project Owners
+      submit = group Administrators
+      submit = group Project Owners
+    [access "refs/tags/*"]
+      pushTag = group Administrators
+      pushTag = group Project Owners
+      pushSignedTag = group Administrators
+      pushSignedTag = group Project Owners
+    [label "Code-Review"]
+      function = MaxWithBlock
+      copyMinScore = true
+      value = -2 This shall not be merged
+      value = -1 I would prefer this is not merged as is
+      value =  0 No score
+      value = +1 Looks good to me, but someone else must approve
+      value = +2 Looks good to me, approved
+    [label "Verified"]
+      function = MaxWithBlock
+      copyMinScore = true
+      value = -1 Fails
+      value =  0 No score
+      value = +1 Verified
 
 Read more
 =========

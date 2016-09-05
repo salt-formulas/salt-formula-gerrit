@@ -1,0 +1,13 @@
+{%- from "gerrit/map.jinja" import client with context %}
+{%- for project_name, project in client.project.iteritems() %}
+- project: {{ project_name }}
+  {%- if project.description is defined %}
+  description: {{ project.description }}
+  {%- endif %}
+  {%- if project.groups is defined %}
+  groups:
+  {%- for group in project.groups %}
+    - {{ group }}
+  {%- endfor %}
+  {%- endif %}
+{%- endfor %}

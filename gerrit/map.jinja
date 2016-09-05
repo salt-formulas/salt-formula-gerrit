@@ -15,8 +15,17 @@ Debian:
 
 {%- load_yaml as client_defaults %}
 Debian:
+  homepage: "http://domain.com/"
   pkgs:
   - python-gerritlib
+  - jeepyb
+  dir:
+    base: /usr/share/jeepyb
+    acls: /srv/jeepyb/acls
+    git: /srv/jeepyb/git
+    cache: /srv/jeepyb/cache
+  config:
+    key: /var/cache/salt/minion/gerrit_rsa
 {%- endload %}
 
 {%- set client = salt['grains.filter_by'](client_defaults, merge=salt['pillar.get']('gerrit:client')) %}
