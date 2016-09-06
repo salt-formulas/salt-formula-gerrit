@@ -11,11 +11,17 @@ gerrit_client_dirs:
     - {{ client.dir.acls }}
     - {{ client.dir.cache }}
     - {{ client.dir.git }}
+    - /etc/github
   - makedirs: true
 
 /etc/salt/minion.d/_gerrit.conf:
   file.managed:
   - source: salt://gerrit/files/_gerrit.conf
+  - template: jinja
+
+/etc/github/github-projects.secure.config:
+  file.managed:
+  - source: salt://gerrit/files/github-projects.secure.config
   - template: jinja
 
 {{ client.config.key }}:

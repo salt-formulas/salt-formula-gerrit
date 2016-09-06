@@ -1,0 +1,13 @@
+# This file is managed by Salt.
+
+cache-root: /var/cache/pypimirror
+
+mirrors:
+  {%- for mirror_name, mirror in client.mirror %}
+  - name: {{ mirror_name }}
+    projects:
+      {%- for project in mirror.projects %}
+      - {{ project }}
+      {%- endfor %}
+    output: /var/lib/pypimirror/{{ mirror_name }}
+  {%- endfor %}

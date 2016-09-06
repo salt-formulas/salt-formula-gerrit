@@ -1,8 +1,15 @@
 {%- from "gerrit/map.jinja" import client with context %}
 {%- for project_name, project in client.project.iteritems() %}
 - project: {{ project_name }}
+  acl-config: {{ client.dir.acls }}/{{ project_name }}.config
   {%- if project.description is defined %}
   description: {{ project.description }}
+  {%- endif %}
+  {%- if project.upstream is defined %}
+  upstream: {{ project.upstream }}
+  {%- endif %}
+  {%- if project.homepage is defined %}
+  homepage: {{ project.homepage }}
   {%- endif %}
   {%- if project.groups is defined %}
   groups:
