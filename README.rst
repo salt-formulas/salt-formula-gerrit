@@ -124,6 +124,26 @@ Gerrit client enforcing project, full project example
             require_agreement: true
             merge_content: true
 
+
+.. code-block:: yaml
+
+    gerrit:
+      client:
+        enabled: True
+        group:
+          groupname:
+            enabled: true
+            members:
+            - username
+        account:
+          username:
+            enabled: true
+            full_name: hovno
+            email: mail@newt.cz
+            public_key: rsassh
+            http_password: passwd
+
+
 Sample project access
 
 .. code-block:: yaml
