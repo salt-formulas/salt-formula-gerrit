@@ -19,14 +19,74 @@ def __virtual__():
     '''
     Only load if the gerrit module is in __salt__
     '''
-    return 'gerrit' if 'gerrit.auth' in __salt__ else False
+    return 'gerrit' if 'gerrit.account_create' in __salt__ else False
+
+
+def account_present(username, fullname=None, email=None, active=None, groups=[], ssh_key=None, http_password=None, **kwargs):
+    '''
+    Ensures that the gerrit account exists
+    
+    :param username: username
+    :param fullname: fullname
+    :param email: email
+    :param active: active
+    :param groups: array of strings
+        groups:
+            - Non-Interactive Users
+            - Testers
+    :param ssh_key: public ssh key
+    :param http_password: http password
+
+    '''
+    ret = {'name': username,
+           'changes': {},
+           'result': True,
+           'comment': 'Account "{0}" already exists'.format(username)}
+
+    # Check if account is already present
+    group = __salt__['gerrit.account_get'](username, **kwargs)
+
+    if 'Error' not in group:
+        #update group
+        pass
+    else:
+        # Create group
+        __salt__['gerrit.project_create'](username, **kwargs)
+        ret['comment'] = 'Account "{0}" has been added'.format(username)
+        ret['changes']['Account'] = 'Created'
+    return ret
+
+
+def group_present(name, **kwargs):
+    '''
+    Ensures that the gerrit group exists
+    
+    :param name: group name
+    '''
+    ret = {'name': name,
+           'changes': {},
+           'result': True,
+           'comment': 'Group "{0}" already exists'.format(name)}
+
+    # Check if group is already present
+    group = __salt__['gerrit.group_get'](name=name, **kwargs)
+
+    if 'Error' not in group:
+        #update group
+        pass
+    else:
+        # Create group
+        __salt__['gerrit.project_create'](name, **kwargs)
+        ret['comment'] = 'Group "{0}" has been added'.format(name)
+        ret['changes']['Group'] = 'Created'
+    return ret
 
 
 def project_present(name, description=None, **kwargs):
     '''
     Ensures that the gerrit project exists
     
-    :param name: new project name
+    :param name: project name
     :param description: short project description
     '''
     ret = {'name': name,

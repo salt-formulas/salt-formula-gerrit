@@ -62,29 +62,6 @@ def __virtual__():
 __opts__ = {}
 
 
-def auth(**connection_args):
-    '''
-    Set up gerrit credentials
-
-    Only intended to be used within gerrit-enabled modules
-    '''
-
-    prefix = "gerrit"
-
-    # look in connection_args first, then default to config file
-    def get(key, default=None):
-        return connection_args.get('connection_' + key,
-                                   __salt__['config.get'](prefix, {})).get(key, default)
-
-    host = get('host', 'localhost')
-    user = get('user', 'admin')
-    keyfile = get('keyfile', '/var/cache/salt/minion/gerrit_rsa')
-
-    gerrit_client = gerrit.Gerrit(host, user, keyfile=keyfile)
-
-    return gerrit_client
-
-
 # COMMON
 
 
@@ -189,10 +166,38 @@ def maybe_update_field(gerrit, path, field, gerrit_value, ansible_value,
         changed = True
     return value, changed
 
+
+def quote(name):
+    return urllib.quote(name, safe="")
+
+
 # END COMMON
 
 
-def gerrit_connection(**connection_args):
+def _gerrit_ssh_connection(**connection_args):
+    '''
+    Set up gerrit credentials
+
+    Only intended to be used within gerrit-enabled modules
+    '''
+
+    prefix = "gerrit"
+
+    # look in connection_args first, then default to config file
+    def get(key, default=None):
+        return connection_args.get('connection_' + key,
+                                   __salt__['config.get'](prefix, {})).get(key, default)
+
+    host = get('host', 'localhost')
+    user = get('user', 'admin')
+    keyfile = get('keyfile', '/var/cache/salt/minion/gerrit_rsa')
+
+    gerrit_client = gerrit.Gerrit(host, user, keyfile=keyfile)
+
+    return gerrit_client
+
+
+def _gerrit_http_connection(**connection_args):
 
     prefix = "gerrit"
 
@@ -203,21 +208,41 @@ def gerrit_connection(**connection_args):
             __salt__['config.get'](prefix, {})).get(key, default)
 
     host = get('host', 'localhost')
+    http_port = get('http_port', '8082')
+    protocol = get('protocol', 'http')
     username = get('user', 'admin')
     password = get('password', 'admin')
+
+    url = protocol+"://"+str(host)+':'+str(http_port)
 
     auth = requests.auth.HTTPDigestAuth(
         username, password)
 
     gerrit = pygerrit.rest.GerritRestAPI(
-        url=host, auth=auth)
+        url=url, auth=auth)
 
     return gerrit
 
 
+def _name2id(gerrit, username=None):
+    # Although we could pass an AccountInput entry here to set details in one
+    # go, it's left up to the _update_group() function, to avoid having a
+    # totally separate code path for create vs. update.
+    account_info = gerrit.put('/accounts/%s' % quote(username))
+    return account_info['_account_id']
+
+
+def _create_group(gerrit, name=None):
+    # Although we could pass an AccountInput entry here to set details in one
+    # go, it's left up to the _update_group() function, to avoid having a
+    # totally separate code path for create vs. update.
+    group_info = gerrit.put('/groups/%s' % quote(name))
+    return group_info
+
+
 def create_account(gerrit, username=None):
     # Although we could pass an AccountInput entry here to set details in one
-    # go, it's left up to the update_account() function, to avoid having a
+    # go, it's left up to the _update_account() function, to avoid having a
     # totally separate code path for create vs. update.
     account_info = gerrit.put('/accounts/%s' % quote(username))
     return account_info
@@ -348,7 +373,7 @@ def ensure_only_one_account_ssh_key(gerrit, account_id, ssh_public_key):
     return ssh_public_key, changed
 
 
-def update_account(gerrit, username=None, **params):
+def _update_account(gerrit, username=None, **params):
     change = False
 
     try:
@@ -369,6 +394,7 @@ def update_account(gerrit, username=None, **params):
     path = 'accounts/%s' % account_id
 
     output = {}
+    output['username'] = username
     output['id'] = account_id
 
     fullname, fullname_changed = maybe_update_field(
@@ -376,7 +402,7 @@ def update_account(gerrit, username=None, **params):
     output['fullname'] = fullname
     change |= fullname_changed
 
-    # Ansible sets the value of params that the user did not provide to None.
+    # Set the value of params that the user did not provide to None.
 
     if params.get('active') is not None:
         active = get_boolean(gerrit, path + '/active')
@@ -391,11 +417,11 @@ def update_account(gerrit, username=None, **params):
         output['email'] = email
         change |= emails_changed
 
-    if params.get('groups') is not None:
-        groups, groups_changed = ensure_only_member_of_these_groups(
-            gerrit, account_id, params['groups'])
-        output['groups'] = groups
-        change |= groups_changed
+#    if params.get('groups') is not None:
+#        groups, groups_changed = ensure_only_member_of_these_groups(
+#            gerrit, account_id, params['groups'])
+#        output['groups'] = groups
+#        change |= groups_changed
 
     if params.get('http_password') is not None:
         http_password = get_string(gerrit, path + '/password.http')
@@ -415,10 +441,66 @@ def update_account(gerrit, username=None, **params):
     return output, change
 
 
-def user_create(username, fullname,
-                email, groups=[], **kwargs):
+def _update_group(gerrit, name=None, **params):
+    change = False
+
+    try:
+        group_info = gerrit.get('/groups/%s' % quote(name))
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 404:
+            logging.info("Group %s not found, creating it.", name)
+            group_info = _create_group(gerrit, name)
+            change = True
+        else:
+            raise
+
+    logging.debug(
+        'Existing info for group %s: %s', name,
+        json.dumps(group_info, indent=4))
+
+    output = {group_info['name']: group_info}
+
+    return output, change
+
+
+def account_create(username, fullname=None, email=None, active=None, groups=[], ssh_key=None, http_password=None, **kwargs):
     '''
-    Create a gerrit project
+    Create a gerrit account
+
+    :param username: username
+    :param fullname: fullname
+    :param email: email
+    :param active: active
+    :param groups: array of strings
+        groups:
+            - Non-Interactive Users
+            - Testers
+    :param ssh_key: public ssh key
+    :param http_password: http password
+
+    CLI Examples:
+
+    .. code-block:: bash
+
+        salt '*' gerrit.account_create username "full name" "mail@domain.com"
+
+    '''
+    gerrit_client = _gerrit_http_connection(**kwargs)
+    output, changed = _update_account(
+        gerrit_client, **{
+            'username': username,
+            'fullname': fullname,
+            'email': email,
+            'groups': groups,
+            'ssh_key': ssh_key,
+            'http_password': http_password
+        })
+    return output
+
+
+def account_update(username, fullname=None, email=None, active=None, groups=[], ssh_key=None, http_password=None, **kwargs):
+    '''
+    Create a gerrit account
 
     :param username: username
     :param fullname: fullname
@@ -427,25 +509,116 @@ def user_create(username, fullname,
         groups:
             - Non-Interactive Users
             - Testers
+    :param ssh_key: public ssh key
+    :param http_password: http password
+
     CLI Examples:
 
     .. code-block:: bash
 
-        salt '*' gerrit.user_create namespace/nova description='nova project'
+        salt '*' gerrit.account_create username "full name" "mail@domain.com"
 
     '''
-
-    gerrit_client = gerrit_connection(**kwargs)
-
-    output, changed = update_account(
+    gerrit_client = _gerrit_http_connection(**kwargs)
+    output, changed = _update_account(
         gerrit_client, **{
             'username': username,
             'fullname': fullname,
             'email': email,
             'groups': groups,
+            'ssh_key': ssh_key,
+            'http_password': http_password
         })
-
     return output
+
+def account_list(**kwargs):
+    '''
+    List gerrit accounts
+
+    CLI Examples:
+
+    .. code-block:: bash
+
+        salt '*' gerrit.account_list
+
+    '''
+    gerrit_client = _gerrit_http_connection(**kwargs)
+    ret_list = gerrit_client.get('/accounts/?q=*&n=10000')
+    ret = {}
+    for item in ret_list:
+        ret[item['username']] = item
+    return ret
+
+
+def account_get(username, **kwargs):
+    '''
+    Get gerrit account
+
+    CLI Examples:
+
+    .. code-block:: bash
+
+        salt '*' gerrit.account_get username
+
+    '''
+    gerrit_client = _gerrit_http_connection(**kwargs)
+    item, change = _update_account(gerrit_client, username, **{})
+    ret = item
+    return ret
+
+
+def group_list(**kwargs):
+    '''
+    List gerrit groups
+
+    CLI Examples:
+
+    .. code-block:: bash
+
+        salt '*' gerrit.group_list
+
+    '''
+    gerrit_client = _gerrit_http_connection(**kwargs)
+    return gerrit_client.get('/groups/')
+
+
+def group_get(groupname, **kwargs):
+    '''
+    Get gerrit group
+
+    CLI Examples:
+
+    .. code-block:: bash
+
+        salt '*' gerrit.group_get groupname
+
+    '''
+    gerrit_client = _gerrit_http_connection(**kwargs)
+    try: 
+        item = gerrit_client.get('/groups/%s' % groupname)
+        ret = {item['name']: item}
+    except:
+        ret = {'Error': 'Error in retrieving account'}
+    return ret
+
+
+def group_create(name, **kwargs):
+    '''
+    Create a gerrit group
+
+    :param name: name
+
+    CLI Examples:
+
+    .. code-block:: bash
+
+        salt '*' gerrit.group_create group-name
+
+    '''
+    gerrit_client = _gerrit_http_connection(**kwargs)
+    ret, changed = _update_group(
+        gerrit_client, **{'name': name})
+    return ret
 
 
 def project_create(name, **kwargs):
@@ -462,7 +635,7 @@ def project_create(name, **kwargs):
 
     '''
     ret = {}
-    gerrit_client = auth(**kwargs)
+    gerrit_client = _gerrit_ssh_connection(**kwargs)
 
     project = project_get(name, **kwargs)
 
@@ -484,9 +657,8 @@ def project_get(name, **kwargs):
 
         salt '*' gerrit.project_get projectname
     '''
-    gerrit_client = auth(**kwargs)
+    gerrit_client = _gerrit_ssh_connection(**kwargs)
     ret = {}
-
     projects = gerrit_client.listProjects()
     if not name in projects:
         return {'Error': 'Error in retrieving project'}
@@ -504,11 +676,9 @@ def project_list(**connection_args):
 
         salt '*' gerrit.project_list
     '''
-    gerrit_client = auth(**connection_args)
+    gerrit_client = _gerrit_ssh_connection(**connection_args)
     ret = {}
-
     projects = gerrit_client.listProjects()
-
     for project in projects:
         ret[project] = {
             'name': project
@@ -530,7 +700,7 @@ def query(change, **kwargs):
 
     '''
     ret = {}
-    gerrit_client = auth(**kwargs)
+    gerrit_client = _gerrit_ssh_connection(**kwargs)
     msg = gerrit_client.query(change)
     ret['query'] = msg
     return ret

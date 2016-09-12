@@ -1,3 +1,3 @@
 include:
 - gerrit.client.service
-- gerrit.client.project
+- gerrit.client.user
