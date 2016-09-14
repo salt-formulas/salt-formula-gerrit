@@ -35,8 +35,6 @@ import json
 import logging
 import os
 import urllib
-
-import pygerrit.rest
 import requests.auth
 
 LOG = logging.getLogger(__name__)
@@ -45,6 +43,7 @@ LOG = logging.getLogger(__name__)
 HAS_GERRIT = False
 try:
     from gerritlib import gerrit
+    import pygerrit.rest
     HAS_GERRIT = True
 except ImportError:
     pass
