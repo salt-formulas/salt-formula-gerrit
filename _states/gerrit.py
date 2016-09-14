@@ -47,8 +47,10 @@ def account_present(name, fullname, email=None, active=None, groups=[], ssh_key=
     account = __salt__['gerrit.account_get'](name, **kwargs)
 
     if 'Error' not in account:
-        #update account
-        pass
+        # Update account
+        __salt__['gerrit.account_update'](name, fullname, email, active, groups, ssh_key, http_password, **kwargs)
+        ret['comment'] = 'Account "{0}" has been updated'.format(name)
+        ret['changes']['Account'] = 'Updated'
     else:
         # Create account
         __salt__['gerrit.account_create'](name, fullname, email, active, groups, ssh_key, http_password, **kwargs)
@@ -72,7 +74,7 @@ def group_present(name, description=None, **kwargs):
     group = __salt__['gerrit.group_get'](name, **kwargs)
 
     if 'Error' not in group:
-        #update group
+        # Update group
         pass
     else:
         # Create group
