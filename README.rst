@@ -68,6 +68,36 @@ Full service setup
           user: gerrit
           password: ${_param:postgresql_gerrit_password}
 
+
+Gerrit client enforcing groups
+
+.. code-block:: yaml
+
+    gerrit:
+      client:
+        group:
+          Admin001:
+            description: admin 01
+          Admin002:
+            description: admin 02
+
+
+Gerrit client enforcing users
+
+.. code-block:: yaml
+
+    gerrit:
+      client:
+        user:
+          jdoe:
+            fullname: John Doe
+            email: "jdoe@domain.com"
+            ssh_key: ssh-rsa
+            http_password: password
+            groups:
+            - Admin001
+
+
 Gerrit client enforcing projects
 
 .. code-block:: yaml

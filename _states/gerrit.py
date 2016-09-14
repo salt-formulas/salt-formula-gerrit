@@ -22,11 +22,11 @@ def __virtual__():
     return 'gerrit' if 'gerrit.account_create' in __salt__ else False
 
 
-def account_present(username, fullname=None, email=None, active=None, groups=[], ssh_key=None, http_password=None, **kwargs):
+def account_present(name, fullname, email=None, active=None, groups=[], ssh_key=None, http_password=None, **kwargs):
     '''
     Ensures that the gerrit account exists
     
-    :param username: username
+    :param name: username
     :param fullname: fullname
     :param email: email
     :param active: active
@@ -38,26 +38,26 @@ def account_present(username, fullname=None, email=None, active=None, groups=[],
     :param http_password: http password
 
     '''
-    ret = {'name': username,
+    ret = {'name': name,
            'changes': {},
            'result': True,
-           'comment': 'Account "{0}" already exists'.format(username)}
+           'comment': 'Account "{0}" already exists'.format(name)}
 
     # Check if account is already present
-    group = __salt__['gerrit.account_get'](username, **kwargs)
+    account = __salt__['gerrit.account_get'](name, **kwargs)
 
-    if 'Error' not in group:
-        #update group
+    if 'Error' not in account:
+        #update account
         pass
     else:
-        # Create group
-        __salt__['gerrit.project_create'](username, **kwargs)
-        ret['comment'] = 'Account "{0}" has been added'.format(username)
+        # Create account
+        __salt__['gerrit.account_create'](name, fullname, email, active, groups, ssh_key, http_password, **kwargs)
+        ret['comment'] = 'Account "{0}" has been added'.format(name)
         ret['changes']['Account'] = 'Created'
     return ret
 
 
-def group_present(name, **kwargs):
+def group_present(name, description=None, **kwargs):
     '''
     Ensures that the gerrit group exists
     
@@ -69,14 +69,14 @@ def group_present(name, **kwargs):
            'comment': 'Group "{0}" already exists'.format(name)}
 
     # Check if group is already present
-    group = __salt__['gerrit.group_get'](name=name, **kwargs)
+    group = __salt__['gerrit.group_get'](name, **kwargs)
 
     if 'Error' not in group:
         #update group
         pass
     else:
         # Create group
-        __salt__['gerrit.project_create'](name, **kwargs)
+        __salt__['gerrit.group_create'](name, description, **kwargs)
         ret['comment'] = 'Group "{0}" has been added'.format(name)
         ret['changes']['Group'] = 'Created'
     return ret

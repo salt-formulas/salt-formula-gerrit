@@ -224,12 +224,20 @@ def _gerrit_http_connection(**connection_args):
     return gerrit
 
 
-def _name2id(gerrit, username=None):
+def _account_name2id(gerrit, name=None):
     # Although we could pass an AccountInput entry here to set details in one
     # go, it's left up to the _update_group() function, to avoid having a
     # totally separate code path for create vs. update.
-    account_info = gerrit.put('/accounts/%s' % quote(username))
-    return account_info['_account_id']
+    info = gerrit.get('/accounts/%s' % quote(name))
+    return info['_account_id']
+
+
+def _group_name2id(gerrit, name=None):
+    # Although we could pass an AccountInput entry here to set details in one
+    # go, it's left up to the _update_group() function, to avoid having a
+    # totally separate code path for create vs. update.
+    info = gerrit.get('/groups/%s' % quote(name))
+    return info['id']
 
 
 def _create_group(gerrit, name=None):
@@ -276,6 +284,8 @@ def create_account_ssh_key(gerrit, account_id, ssh_public_key):
 
 def create_group_membership(gerrit, account_id, group_id):
     logging.info('Creating membership of %s in group %s', account_id, group_id)
+#    group_id = _group_name2id(gerrit, group_id)
+    print group_id
     path = 'groups/%s/members/%s' % (quote(group_id), account_id)
     gerrit.put(path)
 
@@ -417,11 +427,11 @@ def _update_account(gerrit, username=None, **params):
         output['email'] = email
         change |= emails_changed
 
-#    if params.get('groups') is not None:
-#        groups, groups_changed = ensure_only_member_of_these_groups(
-#            gerrit, account_id, params['groups'])
-#        output['groups'] = groups
-#        change |= groups_changed
+    if params.get('groups') is not None:
+        groups, groups_changed = ensure_only_member_of_these_groups(
+            gerrit, account_info.get('name'), params['groups'])
+        output['groups'] = groups
+        change |= groups_changed
 
     if params.get('http_password') is not None:
         http_password = get_string(gerrit, path + '/password.http')
@@ -550,7 +560,7 @@ def account_list(**kwargs):
     return ret
 
 
-def account_get(username, **kwargs):
+def account_get(name, **kwargs):
     '''
     Get gerrit account
 
@@ -558,12 +568,15 @@ def account_get(username, **kwargs):
 
     .. code-block:: bash
 
-        salt '*' gerrit.account_get username
+        salt '*' gerrit.account_get name
 
     '''
     gerrit_client = _gerrit_http_connection(**kwargs)
-    item, change = _update_account(gerrit_client, username, **{})
-    ret = item
+    accounts = account_list(**kwargs)
+    if(name in accounts):
+        ret = accounts.pop(name)
+    else:
+        ret = {'Error': 'Error in retrieving account'}
     return ret
 
 
@@ -602,7 +615,7 @@ def group_get(groupname, **kwargs):
     return ret
 
 
-def group_create(name, **kwargs):
+def group_create(name, description=None, **kwargs):
     '''
     Create a gerrit group
 
@@ -612,12 +625,12 @@ def group_create(name, **kwargs):
 
     .. code-block:: bash
 
-        salt '*' gerrit.group_create group-name
+        salt '*' gerrit.group_create group-name fsdfgwegfe
 
     '''
     gerrit_client = _gerrit_http_connection(**kwargs)
     ret, changed = _update_group(
-        gerrit_client, **{'name': name})
+        gerrit_client, **{'name': name, 'description': description})
     return ret
 
 
