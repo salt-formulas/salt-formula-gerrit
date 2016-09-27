@@ -201,10 +201,9 @@ def _create_account_ssh_key(gerrit, account_id, ssh_public_key):
                  account_id)
 
     import requests
-    from pygerrit import decode_response
+    from pygerrit.rest import _decode_response
 
     path = 'accounts/%s/sshkeys' % (account_id)
-    # gerrit.post(path, data=ssh_public_key)
 
     kwargs = {
         "data": ssh_public_key
@@ -213,7 +212,7 @@ def _create_account_ssh_key(gerrit, account_id, ssh_public_key):
 
     response = requests.put(gerrit.make_url(path), **kwargs)
 
-    return gerrit.decode_response(response)
+    return _decode_response(response)
 
 
 def _create_group_membership(gerrit, account_id, group_id):
