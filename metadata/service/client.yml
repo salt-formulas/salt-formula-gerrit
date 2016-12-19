@@ -1,0 +1,8 @@
+applications:
+- gerrit
+classes:
+  - service.gerrit.support
+parameters:
+  gerrit:
+    client:
+      enabled: True

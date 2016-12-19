@@ -1,12 +1,28 @@
-{%- from "gerrit/map.jinja" import server with context %}
-# Fill in documentation details
 doc:
-  name: gerrit
-  description: Some service info
+  name: Gerrit
+  description: Gerrit provides web based code review and repository management for the Git version control system.
   role:
+    {%- if pillar.gerrit.server is defined %}
     server:
       name: server
+      param: {}
+    {%- endif %}
+    {%- if pillar.gerrit.client is defined %}
+    {% from "gerrit/map.jinja" import client with context %}
+    client:
+      name: client
       param:
-        some_param:
-          name: "Some name"
-          value: "some value"
+        server:
+          value: "{{ client.server.user }}@{{ client.server.host }}:{{ client.server.http_port }} (ssh_port: {{ client.server.ssh_port }})"
+        {%- if client.get('project', {}) %}
+        projects:
+          value: {{ client.project.keys()|yaml }}
+        {%- endif %}
+        {%- if client.get('user', {}) %}
+        users:
+          value:
+            {%- for name, user in client.user.iteritems() %}
+            - "{{ name }} ({{ user.fullname }})"
+            {%- endfor %}
+        {%- endif %}
+    {%- endif %}
