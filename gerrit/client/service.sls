@@ -1,13 +1,32 @@
 {% from "gerrit/map.jinja" import client with context %}
 {%- if client.enabled %}
 
+{%- if client.source.engine == 'pkg' %}
+
 gerrit_client_install:
   pkg.installed:
-  - names: {{ client.pkgs }}
+  - names: {{ client.source.pkgs }}
+
+{%- elif client.source.engine == 'pip' %}
+
+gerrit_python_pip:
+  pkg.installed:
+    - name: python-pip
+
+gerrit_client_install:
+  pip.installed:
+    - names:
+      - pygerrit
+      - gerritlib
+      - "git+https://github.com/openstack-infra/jeepyb.git"
+    - require:
+      - pkg: gerrit_python_pip
+
+{%- endif %}
 
 gerrit_client_dirs:
   file.directory:
-  - names: 
+  - names:
     - {{ client.dir.acls }}
     - {{ client.dir.cache }}
     - {{ client.dir.git }}

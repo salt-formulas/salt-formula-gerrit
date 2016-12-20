@@ -16,14 +16,19 @@ Debian:
 {%- load_yaml as client_defaults %}
 Debian:
   homepage: "http://domain.com/"
-  pkgs:
-  - python-gerritlib
-  - jeepyb
+  source:
+    engine: pkg
+    pkgs:
+    - python-gerritlib
+    - python-pygerrit
+    - jeepyb
   dir:
     base: /usr/share/jeepyb
     acls: /srv/jeepyb/acls
     git: /srv/jeepyb/git
     cache: /srv/jeepyb/cache
+    gerrit_config: /home/gerrit2/review_site/etc/gerrit.config
+    gerrit_secure_config: /home/gerrit2/review_site/etc/secure.config
   config:
     key: /var/cache/salt/minion/gerrit_rsa
 {%- endload %}

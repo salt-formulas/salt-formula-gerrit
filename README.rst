@@ -82,12 +82,14 @@ Gerrit client enforcing groups
             description: admin 02
 
 
-Gerrit client enforcing users
+Gerrit client enforcing users, install using pip
 
 .. code-block:: yaml
 
     gerrit:
       client:
+        source:
+          engine: pip
         user:
           jdoe:
             fullname: John Doe

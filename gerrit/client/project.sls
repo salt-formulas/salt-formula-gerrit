@@ -5,28 +5,15 @@
   file.managed:
   - source: salt://gerrit/files/projects.ini
   - template: jinja
-
-jeepyb_projects_ini_env:
-  environ.setenv:
-  - name: PROJECTS_INI
-  - value: /srv/jeepyb/projects.ini
-  - update_minion: True
-  - require:
-    - file: /srv/jeepyb/projects.ini
+  - require_in:
+    - cmd: gerrit_client_enforce_projects
 
 /srv/jeepyb/projects.yaml:
   file.managed:
   - source: salt://gerrit/files/projects.yaml
   - template: jinja
-
-jeepyb_setup_projects:
-  environ.setenv:
-  - name: PROJECTS_YAML
-  - value: /srv/jeepyb/projects.yaml
-  - update_minion: True
-  - require:
-    - environ: jeepyb_projects_ini_env
-    - file: /srv/jeepyb/projects.yaml
+  - require_in:
+    - cmd: gerrit_client_enforce_projects
 
 {%- for project_name, project in client.project.iteritems() %}
 
@@ -36,8 +23,6 @@ jeepyb_setup_projects:
   - template: jinja
   - defaults:
       project_name: {{ project_name }}
-  - require:
-    - environ: jeepyb_setup_projects
   - require_in:
     - cmd: gerrit_client_enforce_projects
 
@@ -51,7 +36,11 @@ gerrit_client_project_{{ project_name }}:
 
 gerrit_client_enforce_projects:
   cmd.run:
-  - name: ./manage-projects -v
-  - cwd: {{ client.dir.base }}
+  - name: manage-projects -v
+  - env:
+    - PROJECTS_INI: "/srv/jeepyb/projects.ini"
+    - PROJECTS_YAML: "/srv/jeepyb/projects.yaml"
+    - GERRIT_CONFIG: "{{ client.dir.gerrit_config }}"
+    - GERRIT_SECURE_CONFIG: "{{ client.dir.gerrit_secure_config }}"
 
 {%- endif %}
