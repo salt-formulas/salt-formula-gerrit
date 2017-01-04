@@ -21,6 +21,7 @@
   file.managed:
   - source: salt://gerrit/files/project.config
   - template: jinja
+  - makedirs: true
   - defaults:
       project_name: {{ project_name }}
   - require_in:
