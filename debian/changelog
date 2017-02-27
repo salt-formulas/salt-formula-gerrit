@@ -1,3 +1,9 @@
+salt-formula-gerrit (2017.2) trusty; urgency=medium
+
+  * New version
+
+ -- Ales Komarek <ales.komarek@tcpcloud.eu>  Mon, 27 Feb 2017 17:06:49 +0100
+
 salt-formula-gerrit (0.1) trusty; urgency=medium
 
   * Initial release
