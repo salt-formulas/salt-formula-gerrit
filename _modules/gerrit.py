@@ -84,7 +84,7 @@ def _get_list(gerrit, path):
 def _get_string(gerrit, path):
     try:
         value = gerrit.get(path)
-    except requests.exceptions.HTTPError as e:
+    except Exception as e:
         if e.response.status_code == 404:
             logging.debug("Ignoring exception %s", e)
             logging.debug("Got %s", e.response.__dict__)
@@ -239,7 +239,7 @@ def _ensure_only_member_of_these_groups(gerrit, account_id, salt_groups):
             try:
                 gerrit.delete(membership_path)
                 changed = True
-            except requests.exceptions.HTTPError as e:
+            except Exception as e:
                 if e.response.status_code == 404:
                     # This is a kludge, it'd be better to work out in advance
                     # which groups the user is a member of only via membership
@@ -319,7 +319,7 @@ def _update_account(gerrit, username=None, **params):
 
     try:
         account_info = gerrit.get('/accounts/%s' % _quote(username))
-    except requests.exceptions.HTTPError as e:
+    except Exception as e:
         if e.response.status_code == 404:
             logging.info("Account %s not found, creating it.", username)
             account_info = _create_account(gerrit, username)
@@ -387,7 +387,7 @@ def _update_group(gerrit, name=None, **params):
 
     try:
         group_info = gerrit.get('/groups/%s' % _quote(name))
-    except requests.exceptions.HTTPError as e:
+    except Exception as e:
         if e.response.status_code == 404:
             logging.info("Group %s not found, creating it.", name)
             group_info = _create_group(gerrit, name)
@@ -597,7 +597,7 @@ def group_get(groupname, **kwargs):
 
     '''
     gerrit_client = _gerrit_http_connection(**kwargs)
-    try: 
+    try:
         item = gerrit_client.get('/groups/%s' % groupname)
         ret = {item['name']: item}
     except:
