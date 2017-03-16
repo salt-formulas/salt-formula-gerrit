@@ -17,7 +17,7 @@ gerrit_client_install:
   pip.installed:
     - names:
       - pygerrit
-      - gerritlib
+      - "git+https://github.com/openstack-infra/gerritlib.git"
       - "git+https://github.com/openstack-infra/jeepyb.git"
     - require:
       - pkg: gerrit_python_pip
