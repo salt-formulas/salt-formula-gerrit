@@ -212,7 +212,7 @@ def _create_account_ssh_key(gerrit, account_id, ssh_public_key):
     }
     kwargs.update(gerrit.kwargs.copy())
 
-    response = requests.put(gerrit.make_url(path), **kwargs)
+    response = requests.post(gerrit.make_url(path), **kwargs)
 
 
 def _create_group_membership(gerrit, account_id, group_id):
@@ -367,7 +367,7 @@ def _update_account(gerrit, username=None, **params):
         output['email'] = email
         change |= emails_changed
 
-    if params.get('groups') is not None:
+    if params.get('groups'):
         groups, groups_changed = _ensure_only_member_of_these_groups(
             gerrit, account_info.get('name'), params['groups'])
         output['groups'] = groups
@@ -579,10 +579,9 @@ def account_get(name, **kwargs):
 
     '''
     gerrit_client = _gerrit_http_connection(**kwargs)
-    accounts = account_list(**kwargs)
-    if(name in accounts):
-        ret = accounts.pop(name)
-    else:
+    try:
+        ret = gerrit_client.get('/accounts/%s' % name)
+    except Exception:
         ret = {'Error': 'Error in retrieving account'}
     return ret
 
