@@ -457,11 +457,16 @@ def _gerrit_http_connection(**connection_args):
     protocol = get('protocol', 'http')
     username = get('user', 'admin')
     password = get('password', 'admin')
+    auth_method = get('auth_method', 'digest')
 
     url = protocol+"://"+str(host)+':'+str(http_port)
 
-    auth = requests.auth.HTTPDigestAuth(
-        username, password)
+    if auth_method == 'digest':
+        auth = requests.auth.HTTPDigestAuth(username, password)
+    elif auth_method == 'basic':
+        auth = requests.auth.HTTPBasicAuth(username, password)
+    else:
+        raise Exception("Unknown auth_method %s" % auth_method)
 
     gerrit = pygerrit.rest.GerritRestAPI(
         url=url, auth=auth)
