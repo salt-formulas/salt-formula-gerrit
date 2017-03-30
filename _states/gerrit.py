@@ -22,10 +22,10 @@ def __virtual__():
     return 'gerrit' if 'gerrit.account_create' in __salt__ else False
 
 
-def account_present(name, fullname, email=None, active=None, groups=[], ssh_key=None, http_password=None, **kwargs):
+def account_present(name, fullname=None, email=None, active=None, groups=[], ssh_key=None, http_password=None, **kwargs):
     '''
     Ensures that the gerrit account exists
-    
+
     :param name: username
     :param fullname: fullname
     :param email: email
@@ -62,7 +62,7 @@ def account_present(name, fullname, email=None, active=None, groups=[], ssh_key=
 def group_present(name, description=None, **kwargs):
     '''
     Ensures that the gerrit group exists
-    
+
     :param name: group name
     '''
     ret = {'name': name,
@@ -87,7 +87,7 @@ def group_present(name, description=None, **kwargs):
 def project_present(name, description=None, **kwargs):
     '''
     Ensures that the gerrit project exists
-    
+
     :param name: project name
     :param description: short project description
     '''

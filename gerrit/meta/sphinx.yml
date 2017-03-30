@@ -22,7 +22,7 @@ doc:
         users:
           value:
             {%- for name, user in client.user.iteritems() %}
-            - "{{ name }} ({{ user.fullname }})"
+            - "{{ name }}{% if user.fullname is defined %} ({{ user.fullname }}){% endif %}"
             {%- endfor %}
         {%- endif %}
     {%- endif %}
