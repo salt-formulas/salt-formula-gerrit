@@ -1,0 +1,21 @@
+minion:
+  {%- if pillar.gerrit.client is defined %}
+  gerrit:
+    {%- from "gerrit/map.jinja" import client with context %}
+    gerrit:
+      host: {{ client.server.host }}
+      user: {{ client.server.user }}
+      auth_method: {{ client.server.get('auth_method', 'digest') }}
+      {%- if client.server.protocol is defined %}
+      protocol: {{ client.server.protocol }}
+      {%- endif %}
+      {%- if client.server.http_port is defined %}
+      http_port: {{ client.server.http_port }}
+      {%- endif %}
+      {%- if client.server.password is defined %}
+      password: {{ client.server.password }}
+      {%- endif %}
+      {%- if client.server.key is defined %}
+      keyfile: {{ client.config.key }}
+      {%- endif %}
+  {%- endif %}
