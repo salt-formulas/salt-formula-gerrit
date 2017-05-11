@@ -1,5 +1,5 @@
 minion:
-  {%- if pillar.gerrit.client is defined %}
+  {%- if pillar.get('gerrit', {}).get('client') %}
   gerrit:
     {%- from "gerrit/map.jinja" import client with context %}
     gerrit:
