@@ -23,7 +23,7 @@
   - template: jinja
   - makedirs: true
   - defaults:
-      project_name: {{ project_name }}
+      project_name: {{ project.get('name', project_name) }}
   - require_in:
     - cmd: gerrit_client_enforce_projects
 
