@@ -14,6 +14,7 @@ Debian:
 {%- set server = salt['grains.filter_by'](server_defaults, merge=salt['pillar.get']('gerrit:server')) %}
 
 {%- load_yaml as client_defaults %}
+{% set project_config = pillar.gerrit.get('client', {}).get('dir', {}).get('project_config', '/srv/jeepyb') %}
 Debian:
   homepage: "http://domain.com/"
   source:
@@ -24,10 +25,11 @@ Debian:
     - jeepyb
     - curl
   dir:
+    project_config: {{ project_config }}
     base: /usr/share/jeepyb
-    acls: /srv/jeepyb/acls
+    acls: {{ project_config }}/acls
     git: /srv/jeepyb/git
-    cache: /srv/jeepyb/cache
+    cache: {{ project_config }}/cache
     gerrit_config: /home/gerrit2/review_site/etc/gerrit.config
     gerrit_secure_config: /home/gerrit2/review_site/etc/secure.config
   config:
