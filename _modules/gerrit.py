@@ -212,14 +212,12 @@ def _create_account_ssh_key(gerrit, account_id, ssh_public_key):
     }
     kwargs.update(gerrit.kwargs.copy())
 
-    response = requests.post(gerrit.make_url(path), **kwargs)
+    requests.post(gerrit.make_url(path), **kwargs)
 
 
 def _create_group_membership(gerrit, account_id, group_id):
     logging.info('Creating membership of %s in group %s', account_id, group_id)
 #    group_id = _group_name2id(gerrit, group_id)
-    print group_id
-    import json
     path = 'groups/%s/members/%s' % (_quote(group_id), account_id)
     gerrit.put(path, data=json.dumps({}))
 
@@ -384,7 +382,7 @@ def _update_account(gerrit, username=None, **params):
 
     if params.get('ssh_key') is not None:
         ssh_key, ssh_keys_changed = _ensure_only_one_account_ssh_key(
-            gerrit, account_id,  params['ssh_key'])
+            gerrit, account_id, params['ssh_key'])
         output['ssh_key'] = ssh_key
         change |= ssh_keys_changed
 
@@ -459,7 +457,7 @@ def _gerrit_http_connection(**connection_args):
     password = get('password', 'admin')
     auth_method = get('auth_method', 'digest')
 
-    url = protocol+"://"+str(host)+':'+str(http_port)
+    url = protocol + "://" + str(host) + ':' + str(http_port)
 
     if auth_method == 'digest':
         auth = requests.auth.HTTPDigestAuth(username, password)
@@ -547,6 +545,7 @@ def account_update(username, fullname=None, email=None, active=None, groups=[], 
             'http_password': http_password
         })
     return output
+
 
 def account_list(**kwargs):
     '''
@@ -653,16 +652,15 @@ def project_create(name, **kwargs):
         salt '*' gerrit.project_create namespace/nova description='nova project'
 
     '''
-    ret = {}
     gerrit_client = _gerrit_ssh_connection(**kwargs)
 
     project = project_get(name, **kwargs)
 
-    if project and not "Error" in project:
+    if project and "Error" not in project:
         LOG.debug("Project {0} exists".format(name))
         return project
 
-    new = gerrit_client.createProject(name)
+    gerrit_client.createProject(name)
     return project_get(name, **kwargs)
 
 
@@ -679,7 +677,7 @@ def project_get(name, **kwargs):
     gerrit_client = _gerrit_ssh_connection(**kwargs)
     ret = {}
     projects = gerrit_client.listProjects()
-    if not name in projects:
+    if name not in projects:
         return {'Error': 'Error in retrieving project'}
     ret[name] = {'name': name}
     return ret
