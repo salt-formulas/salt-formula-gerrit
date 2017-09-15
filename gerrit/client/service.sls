@@ -40,7 +40,7 @@ gerrit_client_dirs:
 #}
 gerrit_try_login:
   cmd.run:
-    - name: http_proxy='' curl -svr -X POST --data "username={{ client.server.user }}&password={{ client.server.password }}" {{ client.server.protocol|default('http') }}://{{ client.server.host }}:{{ client.server.http_port|default(80) }}/login
+    - name: http_proxy='' curl -fsvr -X POST --data "username={{ client.server.user }}&password={{ client.server.password }}" {{ client.server.protocol|default('http') }}://{{ client.server.host }}:{{ client.server.http_port|default(80) }}/login 
 {%- endif %}
 
 /etc/github/github-projects.secure.config:
