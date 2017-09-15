@@ -9,18 +9,27 @@ gerrit_client_install:
 
 {%- elif client.source.engine == 'pip' %}
 
+{#-
+  This separate installation of pbr is a workaround to be able to install Gerrit packages
+  offline with local mirrors because setup.py has problems with resolving this dependency.
+#}
 gerrit_python_pip:
   pkg.installed:
     - name: python-pip
+
+pbr_install:
+  pip.installed:
+    - name: pbr
 
 gerrit_client_install:
   pip.installed:
     - names:
       - pygerrit
-      - "git+https://github.com/openstack-infra/gerritlib.git"
-      - "git+https://github.com/openstack-infra/jeepyb.git"
+      - "{{ client.repo.get('gerritlib', 'git+https://github.com/openstack-infra/gerritlib.git') }}"
+      - "{{ client.repo.get('jeepyb', 'git+https://github.com/openstack-infra/jeepyb.git') }}"
     - require:
       - pkg: gerrit_python_pip
+      - pip: pbr_install
 
 {%- endif %}
 
