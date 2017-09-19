@@ -155,6 +155,7 @@ Gerrit client enforcing project, full project example
             require_change_id: true
             require_agreement: true
             merge_content: true
+            action: "fast forward only"
 
 
 .. code-block:: yaml
