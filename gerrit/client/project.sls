@@ -43,5 +43,6 @@ gerrit_client_enforce_projects:
     - PROJECTS_YAML: "{{ client.dir.project_config }}/projects.yaml"
     - GERRIT_CONFIG: "{{ client.dir.gerrit_config }}"
     - GERRIT_SECURE_CONFIG: "{{ client.dir.gerrit_secure_config }}"
+    - GIT_COMMITTER_EMAIL: "{{ client.server.email }}"
 
 {%- endif %}
