@@ -10,6 +10,6 @@ Vcs-Git: https://github.com/tcpcloud/salt-formula-gerrit.git
 
 Package: salt-formula-gerrit
 Architecture: all
-Depends: ${misc:Depends}, salt-master, reclass
+Depends: ${misc:Depends}
 Description: gerrit salt formula
  Install and configure gerrit system.
