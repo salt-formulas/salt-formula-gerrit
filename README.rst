@@ -60,6 +60,11 @@ Full service setup
           engine: http
           address: https://gerrit-releases.storage.googleapis.com/gerrit-2.12.4.war
           hash: sha256=45786a920a929c6258de6461bcf03ddec8925577bd485905f102ceb6e5e1e47c
+              receive_timeout: 5min
+        sshd:
+          threads: 64
+          batch_threads: 16
+          max_connections_per_user: 64
         database:
           engine: postgresql
           host: localhost
@@ -67,6 +72,17 @@ Full service setup
           name: gerrit
           user: gerrit
           password: ${_param:postgresql_gerrit_password}
+          pool_limit: 250
+          pool_max_idle: 16 
+
+Gerrit change auto abandon
+
+.. code-block:: yaml
+
+    gerrit:
+      server:
+        change_cleanup:
+          abandon_after: 3months
 
 
 Gerrit client enforcing groups
