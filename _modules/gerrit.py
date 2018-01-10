@@ -44,9 +44,9 @@ HAS_GERRIT = False
 try:
     from gerritlib import gerrit
     try:
-        import pygerrit2.rest as pygerrit
+        from pygerrit2 import rest as pygerrit
     except ImportError:
-        import pygerrit.rest
+        from pygerrit import rest as pygerrit
     HAS_GERRIT = True
 except ImportError:
     pass
@@ -469,7 +469,7 @@ def _gerrit_http_connection(**connection_args):
     else:
         raise Exception("Unknown auth_method %s" % auth_method)
 
-    gerrit = pygerrit.rest.GerritRestAPI(
+    gerrit = pygerrit.GerritRestAPI(
         url=url, auth=auth)
 
     return gerrit
