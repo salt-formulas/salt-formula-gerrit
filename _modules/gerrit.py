@@ -43,7 +43,10 @@ LOG = logging.getLogger(__name__)
 HAS_GERRIT = False
 try:
     from gerritlib import gerrit
-    import pygerrit.rest
+    try:
+        import pygerrit2.rest as pygerrit
+    except ImportError:
+        import pygerrit.rest
     HAS_GERRIT = True
 except ImportError:
     pass
