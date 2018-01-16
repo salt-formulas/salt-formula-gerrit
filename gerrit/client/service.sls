@@ -24,7 +24,7 @@ pbr_install:
 gerrit_client_install:
   pip.installed:
     - names:
-      - pygerrit
+      - pygerrit2
       - "{{ client.get('repo', {}).get('gerritlib', 'git+https://github.com/openstack-infra/gerritlib.git') }}"
       - "{{ client.get('repo', {}).get('jeepyb', 'git+https://github.com/openstack-infra/jeepyb.git') }}"
     - require:
