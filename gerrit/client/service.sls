@@ -5,7 +5,7 @@
 
 gerrit_client_install:
   pkg.installed:
-  - names: {{ client.source.pkgs }}
+  - names: {{ client.source.pkgs + client.source.pkgs_salt }}
 
 {%- elif client.source.engine == 'pip' %}
 

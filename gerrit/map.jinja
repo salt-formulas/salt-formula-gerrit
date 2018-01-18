@@ -20,10 +20,11 @@ Debian:
   source:
     engine: pkg
     pkgs:
-    - python-gerritlib
-    - python-pygerrit2
     - jeepyb
     - curl
+    pkgs_salt:
+    - python-gerritlib
+    - python-pygerrit2
   dir:
     project_config: {{ project_config }}
     base: /usr/share/jeepyb

@@ -19,3 +19,18 @@ minion:
       keyfile: {{ client.config.key }}
       {%- endif %}
   {%- endif %}
+dependency:
+  {% from "gerrit/map.jinja" import client with context %}
+  {%- if client.enabled %}
+  {%- if client.source.engine == 'pkg' %}
+  engine: pkg
+  pkgs: {{ client.source.pkgs_salt }}
+  {%- elif client.source.engine == 'pip' %}
+  engine: pip
+  pkgs:
+    - python-pip
+  python_pkgs:
+    - pygerrit2
+    - "{{ client.get('repo', {}).get('gerritlib', 'git+https://github.com/openstack-infra/gerritlib.git') }}"
+  {%- endif %}
+  {%- endif %}
