@@ -28,7 +28,7 @@ dependency:
   {%- elif client.source.engine == 'pip' %}
   engine: pip
   pkgs:
-    - python-pip
+    - pip
   python_pkgs:
     - pygerrit2
     - "{{ client.get('repo', {}).get('gerritlib', 'git+https://github.com/openstack-infra/gerritlib.git') }}"
