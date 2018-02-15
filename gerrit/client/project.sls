@@ -35,9 +35,16 @@ gerrit_client_project_{{ project_name }}:
 
 {%- endfor %}
 {%- endif %}
+
+{%- if client.source.engine == 'pkg' %}
+  {%- set manage_projects_bin = "/usr/share/jeepyb/manage-projects" %}
+{%- else %}
+  {%- set manage_projects_bin = "manage-projects" %}
+{%- endif %}
+
 gerrit_client_enforce_projects:
   cmd.run:
-  - name: manage-projects -d -v 2>&1 | tee {{ client.dir.project_config }}/jeepyb.log
+  - name: {{ manage_projects_bin }} -d -v 2>&1 | tee {{ client.dir.project_config }}/jeepyb.log
   - env:
     - PROJECTS_INI: "{{ client.dir.project_config }}/projects.ini"
     - PROJECTS_YAML: "{{ client.dir.project_config }}/projects.yaml"
