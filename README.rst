@@ -168,6 +168,7 @@ Gerrit client enforcing project, full project example
                 actions:
                 - name: pushSignedTag
                   group: openstack-salt-release
+                  force: true
             inherit_access: All-Projects
             require_change_id: true
             require_agreement: true
@@ -233,7 +234,7 @@ Sample project access
     [access "refs/tags/*"]
       pushTag = group Administrators
       pushTag = group Project Owners
-      pushSignedTag = group Administrators
+      pushSignedTag = +force group Administrators
       pushSignedTag = group Project Owners
     [label "Code-Review"]
       function = MaxWithBlock
