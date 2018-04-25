@@ -194,6 +194,16 @@ Gerrit client enforcing project, full project example
             public_key: rsassh
             http_password: passwd
 
+Gerrit client proxy
+
+.. code-block:: yaml
+
+    gerrit:
+      client:
+        proxy:
+          http_proxy: http://192.168.10.15:8000
+          https_proxy: http://192.168.10.15:8000
+          no_proxy: 192.168.10.90
 
 Sample project access
 

@@ -51,5 +51,15 @@ gerrit_client_enforce_projects:
     - GERRIT_CONFIG: "{{ client.dir.gerrit_config }}"
     - GERRIT_SECURE_CONFIG: "{{ client.dir.gerrit_secure_config }}"
     - GIT_COMMITTER_EMAIL: "{{ client.server.email }}"
+    {%- if client.get('proxy', {}).get('http_proxy') %}
+    - HTTP_PROXY: "{{ client.proxy.http_proxy }}"
+    {%- endif %}
+    {%- if client.get('proxy', {}).get('https_proxy') %}
+    - HTTPS_PROXY: "{{ client.proxy.https_proxy }}"
+    {%- endif %}
+    {%- if client.get('proxy', {}).get('no_proxy') %}
+    - NO_PROXY: "{{ client.proxy.no_proxy }}"
+    {%- endif %}
+
 
 {%- endif %}
