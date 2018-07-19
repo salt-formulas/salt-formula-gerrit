@@ -26,6 +26,7 @@ Full service setup
 
     gerrit:
       server:
+        enabled: true
         canonical_web_url: http://10.10.10.148:8082/
         email_private_key: ""
         token_private_key: ""
