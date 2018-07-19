@@ -21,7 +21,7 @@ minion:
   {%- endif %}
 dependency:
   {% from "gerrit/map.jinja" import client with context %}
-  {%- if client.enabled %}
+  {%- if client.get('enabled', False) %}
   {%- if client.source.engine == 'pkg' %}
   engine: pkg
   pkgs: {{ client.source.pkgs_salt }}

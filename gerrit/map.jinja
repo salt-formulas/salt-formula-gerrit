@@ -14,7 +14,7 @@ Debian:
 {%- set server = salt['grains.filter_by'](server_defaults, merge=salt['pillar.get']('gerrit:server')) %}
 
 {%- load_yaml as client_defaults %}
-{% set project_config = pillar.gerrit.get('client', {}).get('dir', {}).get('project_config', '/srv/jeepyb') %}
+{% set project_config = pillar.get('gerrit', {}).get('client', {}).get('dir', {}).get('project_config', '/srv/jeepyb') %}
 Debian:
   homepage: "http://domain.com/"
   source:
