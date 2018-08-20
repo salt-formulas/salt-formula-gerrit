@@ -61,7 +61,7 @@ gerrit_home:
   - require:
     - file: gerrit_home
 
-{%- if server.plugin.replication is defined %}
+{%- if server.plugin.replication is defined and server.replication is defined %}
 
 {{ server.dir.site }}/etc/replication.config:
   file.managed:
@@ -72,6 +72,16 @@ gerrit_home:
   - require:
     - file: gerrit_home
 
+{%- for remote_host, replication in server.get('replication', {}).iteritems() %}
+gerrit_remote_known_{{ remote_host }}:
+  ssh_known_hosts.present:
+    - name: {{ remote_host }}
+    - port: {{ replication.remote_port }}
+    - user: {{ replication.replication_user }}
+    - hash_known_hosts: false
+    - require:
+      - file: gerrit_home
+{%- endfor %}
 {% endif %}
 
 {{ server.dir.site }}/etc/ssh_project_rsa_key:

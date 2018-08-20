@@ -276,6 +276,23 @@ Sample project access
       value =  0 No score
       value = +1 Verified
 
+Gerrit replication enable
+
+.. code-block:: yaml
+
+    gerrit:
+      server:
+        plugin:
+          replication:
+            engine: gerrit
+        replication:
+          gerrit2.localdomain:
+            remote_url: user@gerrit2.local.domain:/var/lib/gerrit
+            remote_port: 22
+            replication_user: gerrit2
+
+For creating ssh keys use openssh state
+
 Read more
 =========
 
