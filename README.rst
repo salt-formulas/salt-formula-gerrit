@@ -75,7 +75,21 @@ Full service setup
           user: gerrit
           password: ${_param:postgresql_gerrit_password}
           pool_limit: 250
-          pool_max_idle: 16 
+          pool_max_idle: 16
+
+
+Gerrit LDAP authentification
+
+.. code-block:: yaml
+
+    gerrit:
+      server:
+        auth:
+          engine: LDAP
+          ldap_server: ldap://ldap.mycompany.net
+          ldap_account_base: dc=company,dc=net
+          ldap_group_base: ou=Groups,dc=company,dc=net
+
 
 Gerrit change auto abandon
 
