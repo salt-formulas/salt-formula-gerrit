@@ -13,7 +13,7 @@ gerrit_user:
 
 gerrit_home:
   file.directory:
-  - names: 
+  - names:
     - {{ server.dir.home }}/.ssh
     - {{ server.dir.home }}/gerrit-plugins
     - {{ server.dir.site }}/bin
@@ -243,6 +243,13 @@ gerrit_server_configured:
   - require:
     - service: gerrit_server_service
 
+gerrit_server_service_available:
+  cmd.run:
+    - name: until nc -z localhost 29418; do sleep 1; done
+    - timeout: 60
+    - require:
+      - service: gerrit_server_service
+
 gerrit_server_known_host:
   ssh_known_hosts.present:
     - name: localhost
@@ -251,5 +258,6 @@ gerrit_server_known_host:
     - hash_known_hosts: false
     - require:
       - file: gerrit_home
+      - cmd: gerrit_server_service_available
 
 {%- endif %}
