@@ -209,6 +209,8 @@ gerrit_server_service:
     - file: gerrit_server_service_symlink
     - cmd: gerrit_server_initial_index
 
+{%- if not server.get('initial_accounts_disable', False) %}
+
 {%- set initial_accounts_queries = [
   "insert into ACCOUNTS values (NULL, 'admin', NULL, NULL, 'N', NULL, NULL, NULL, NULL, 25, 'N', 'N', 'Y', 'N', NULL, 'Y', 'N', 'admin@ci.localdomain', '2015-05-28 11:00:30.001', 1)",
   "insert into ACCOUNT_GROUP_MEMBERS values (1, 1)",
@@ -235,6 +237,7 @@ gerrit_server_initial_accounts_{{ loop.index }}:
     - file: gerrit_server_configured
 
 {%- endfor %}
+{%- endif %}
 
 gerrit_server_configured:
   file.touch:
