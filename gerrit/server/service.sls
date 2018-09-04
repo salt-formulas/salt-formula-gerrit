@@ -38,7 +38,7 @@ gerrit_home:
   - user: gerrit2
   - group: gerrit2
   - template: jinja
-  - replace: False
+  - replace: true
   - require:
     - file: gerrit_home
 
@@ -48,7 +48,7 @@ gerrit_home:
   - user: gerrit2
   - group: gerrit2
   - template: jinja
-  - replace: False
+  - replace: true
   - require:
     - file: gerrit_home
 

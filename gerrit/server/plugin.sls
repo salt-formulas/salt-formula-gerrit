@@ -8,10 +8,12 @@ include:
 
 {%- if plugin.engine == "http" %}
 
-{{ server.dir.home }}/review_site/plugins/{{ plugin_name }}.jar
+{{ server.dir.home }}/review_site/plugins/{{ plugin_name }}.jar:
   file.managed:
   - source: {{ plugin.address }}
+  - skip_verify: True
   - user: gerrit2
+  - group: gerrit2
 
 {%- endif %}
 
