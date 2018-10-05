@@ -61,6 +61,29 @@ gerrit_home:
   - require:
     - file: gerrit_home
 
+{%- if server.hideci is defined %}
+
+{{ server.dir.site }}/etc/GerritSiteHeader.html:
+  file.managed:
+  - source: salt://gerrit/files/GerritSiteHeader.html
+  - user: gerrit2
+  - group: gerrit2
+  - require:
+    - file: gerrit_home
+
+{%- for file_name in ["hideci.js", "jquery-1.7.2.min.js", "jquery-visibility.js"] %}
+{{ server.dir.site }}/static/{{ file_name }}:
+  file.managed:
+  - source: salt://gerrit/files/static/{{ file_name }}
+  - template: jinja
+  - user: gerrit2
+  - group: gerrit2
+  - require:
+    - file: gerrit_home
+{%- endfor %}
+
+{%- endif %}
+
 {%- if server.plugin.replication is defined and server.replication is defined %}
 
 {{ server.dir.site }}/etc/replication.config:

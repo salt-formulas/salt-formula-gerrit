@@ -293,6 +293,15 @@ Gerrit replication enable
 
 For creating ssh keys use openssh state
 
+Gerrit hide CI
+
+.. code-block:: yaml
+
+    gerrit:
+      server:
+        hideci:
+          ci_user_name: ci_user
+
 Read more
 =========
 
