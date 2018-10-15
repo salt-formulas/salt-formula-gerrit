@@ -44,7 +44,8 @@ gerrit_client_project_{{ project_name }}:
 
 gerrit_client_enforce_projects:
   cmd.run:
-  - name: {{ manage_projects_bin }} -d -v 2>&1 | tee {{ client.dir.project_config }}/jeepyb.log
+  - shell: /bin/bash
+  - name: set -o pipefail; {{ manage_projects_bin }} -d -v 2>&1 | tee {{ client.dir.project_config }}/jeepyb.log
   - env:
     - PROJECTS_INI: "{{ client.dir.project_config }}/projects.ini"
     - PROJECTS_YAML: "{{ client.dir.project_config }}/projects.yaml"
