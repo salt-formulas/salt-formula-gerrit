@@ -89,6 +89,10 @@ Gerrit LDAP authentification
           ldap_server: ldap://ldap.mycompany.net
           ldap_account_base: dc=company,dc=net
           ldap_group_base: ou=Groups,dc=company,dc=net
+          ldap_account_pattern: uid=${username}
+          ldap_group_pattern: (cn=${groupname})
+          ldap_group_query: true
+          ldap_group_member_pattern: (memberUid=${username})
 
 
 Gerrit change auto abandon
